@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{- include "genomicsdb.fullname" . }}-scripts"
+data:
+  loaddb.sh: |-
+    #!/bin/bash
+
+    # update the os and install zip
+    apt-get -yq update
+    apt-get -yq install zip
+
+    # get the paths to the db dump files
+    BCKP_FILE_1=/data/{{ .Values.sqlFile1 }}
+    BCKP_FILE_2=/data/{{ .Values.sqlFile2 }}
+
+    # wait for the db to become ready
+    until pg_isready ; do
+        echo "postgres not ready";
+        sleep 10
+    done
+
+    # go to the data directory
+    cd /data
+
+    # unzip the password protected zip files in this dir
+    unzip -P {{ .Values.zipPassword }} -j /data/{{ .Values.zipFileName }}
+
+    # restore the database
+    psql -U {{ .Values.adminuser }} < $BCKP_FILE_1
+    pg_restore -f $BCKP_FILE_2

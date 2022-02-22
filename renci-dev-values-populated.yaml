@@ -1,0 +1,54 @@
+# Default values for genomicsdb.
+# This is a YAML-formatted file.
+replicaCount: 1
+
+storage:
+    size: 75Gi
+
+# credentials that have enough privileges to restore a database
+adminuser: "postgres"
+adminpassword: "yPgl715zDpy6V5flFenw"
+
+# when populated, this will download the backup file (placed in /projects/stars/var/data_services) and initiate the restore
+dataUrl: "https://stars.renci.org/var/data_services/genomics/" #
+zipFileName: "k8s_pg_backup.zip"
+zipPassword: "zRmkCwyQKuvEFYVW0ylf"
+sqlFile1: "pg_roles.sql"
+sqlFile2: "papyrvs.dump.1"
+
+# DB startup credentials
+user: postgres
+password: ""
+dbName: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 5432
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /
+          pathType: ""
+  tls: []
+
+resources:
+  requests:
+    memory: 16Gi
+    cpu: 1000m
+  limits:
+    memory: 32Gi
+    cpu: 2000m
+
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 2000
+  fsGroup: 3000

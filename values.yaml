@@ -1,0 +1,68 @@
+# Default values for genomicsdb.
+# This is a YAML-formatted file.
+
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: latest
+  pullPolicy: IfNotPresent
+
+storage:
+    size: 25Gi
+
+adminuser: changeme
+adminpassword: "changeme"
+dataUrl: ""
+zipPassword: ""
+zipFileName: ""
+sqlFile1: ""
+sqlFile2: ""
+
+user: changeme
+dbName: "changeme"
+password: "changeme"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 5432
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /
+          pathType: ""
+  tls: []
+
+resources:
+  requests:
+    memory: 8Gi
+    cpu: 1000m
+  limits:
+    memory: 16Gi
+    cpu: 2000m
+
+initresources:
+  limits:
+    memory: 10Gi
+    cpu: 2000m
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
