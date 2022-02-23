@@ -26,6 +26,13 @@ data:
     # unzip the password protected zip files in this dir
     unzip -P {{ .Values.zipPassword }} -j /data/{{ .Values.zipFileName }}
 
-    # restore the database
+{{/*    until false ; do*/}}
+{{/*        sleep 60*/}}
+{{/*    done*/}}
+
+    # restore the roles without the postgres password. psql us used here because it is text format
     psql -U {{ .Values.adminuser }} < $BCKP_FILE_1
-    pg_restore -f $BCKP_FILE_2
+
+    # restore the papyrvs database. pg_restore is used here because it is a compressed backup
+    pg_restore -C -d postgres $BCKP_FILE_2
+
