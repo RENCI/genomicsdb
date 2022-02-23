@@ -19,10 +19,6 @@ zipFileName: ""
 sqlFile1: ""
 sqlFile2: ""
 
-user: changeme
-dbName: "changeme"
-password: "changeme"
-
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
