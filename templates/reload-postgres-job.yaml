@@ -54,4 +54,4 @@ spec:
       - name: data-dir
         persistentVolumeClaim:
           claimName: "{{ include "genomicsdb.fullname" . }}-backup-pvc"
-  {{ end }}
+{{ end }}
