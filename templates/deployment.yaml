@@ -47,7 +47,7 @@ spec:
           volumeMounts:
           - mountPath: /var/lib/postgresql/data
             name: {{ include "genomicsdb.fullname" . }}-postgres-data
-          - mountPath: /data/shm
+          - mountPath: /dev/shm
             name: dshm
       {{- with .Values.nodeSelector }}
       nodeSelector:
