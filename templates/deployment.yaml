@@ -36,8 +36,9 @@ spec:
           env:
           - name: POSTGRES_USER
             value: {{ .Values.adminuser }}
-          - name: POSTGRES_PASSWORD
-            value: {{ .Values.adminpassword }}
+          envFrom:
+            - secretRef:
+                name: "{{ include "genomicsdb.fullname" . }}-password"
           ports:
             - name: postgres-port
               containerPort: 5432

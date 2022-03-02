@@ -38,7 +38,10 @@ spec:
         - name: PGUSER
           value: {{ .Values.adminuser }}
         - name: PGPASSWORD
-          value: {{ .Values.adminpassword }}
+          valueFrom:
+            secretKeyRef:
+              name: "{{ include "genomicsdb.fullname" . }}-password"
+              key: POSTGRES_PASSWORD
         volumeMounts:
         - mountPath:  loaddb.sh
           name: "loader-script"
