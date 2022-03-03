@@ -52,6 +52,10 @@ spec:
           - mountPath: /dev/shm
             name: dshm
           {{- end }}
+          {{- if .Values.extendedPostgresOptions }}
+          - mountPath: /bitnami/postgresql/conf/conf.d/
+            name: extended-config
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -64,12 +68,19 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.shmSize }}
+      {{- if or .Values.shmSize .Values.extendedPostgresOptions }}
       volumes:
+        {{- if .Values.shmSize }}
         - name: dshm
           emptyDir:
             medium: Memory
             sizeLimit: {{ .Values.shmSize }}
+        {{- end }}
+        {{- if .Values.extendedPostgresOptions }}
+        - name: extended-config
+          configMap:
+            name: "{{- include "genomicsdb.fullname" . }}-pg-conf"
+        {{- end }}
       {{- end }}
   volumeClaimTemplates:
     - metadata:

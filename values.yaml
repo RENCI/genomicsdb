@@ -31,6 +31,9 @@ podSecurityContext: {}
 
 securityContext: {}
 
+# formatted as text string like in postgresql.conf (e.g., `max_wal_size = 1GB`)
+extendedPostgresOptions: ""
+
 service:
   type: ClusterIP
   port: 5432
