@@ -34,7 +34,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: POSTGRES_USER
+          - name: POSTGRESQL_USER
             value: {{ .Values.adminuser }}
           envFrom:
             - secretRef:
@@ -46,7 +46,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - mountPath: /var/lib/postgresql/data
+          - mountPath: /bitnami/postgresql
             name: {{ include "genomicsdb.fullname" . }}-postgres-data
           - mountPath: /dev/shm
             name: dshm
