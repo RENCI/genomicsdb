@@ -11,6 +11,8 @@ image:
 storage:
     size: 25Gi
 
+shmSize: ""
+
 adminuser: changeme
 adminpassword: "changeme"
 dataUrl: ""

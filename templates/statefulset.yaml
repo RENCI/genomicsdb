@@ -48,8 +48,10 @@ spec:
           volumeMounts:
           - mountPath: /bitnami/postgresql
             name: {{ include "genomicsdb.fullname" . }}-postgres-data
+          {{- if .Values.shmSize }}
           - mountPath: /dev/shm
             name: dshm
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -62,11 +64,13 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.shmSize }}
       volumes:
         - name: dshm
           emptyDir:
             medium: Memory
-            sizeLimit: 400Mi
+            sizeLimit: {{ .Values.shmSize }}
+      {{- end }}
   volumeClaimTemplates:
     - metadata:
         name: {{ include "genomicsdb.fullname" . }}-postgres-data
