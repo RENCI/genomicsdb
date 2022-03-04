@@ -32,7 +32,8 @@ podAnnotations: {}
 
 podSecurityContext: {}
 
-securityContext: {}
+securityContext:
+  runAsUser: 1001
 
 # formatted as text string like in postgresql.conf (e.g., `max_wal_size = 1GB`)
 extendedPostgresOptions: ""
