@@ -47,7 +47,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
           - mountPath: /bitnami/postgresql
-            name: {{ include "genomicsdb.fullname" . }}-postgres-data
+            name: postgres-data
           {{- if .Values.shmSize }}
           - mountPath: /dev/shm
             name: dshm
@@ -84,7 +84,7 @@ spec:
       {{- end }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ include "genomicsdb.fullname" . }}-postgres-data
+        name: postgres-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
