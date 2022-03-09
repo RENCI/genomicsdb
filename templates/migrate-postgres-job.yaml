@@ -39,7 +39,7 @@ data:
     SELECT pg_reload_conf();
     EOSQL
     
-    pg_dump -Fc -h $OLDHOST $PGDATABASE | pg_restore -C -v -d postgres
+    pg_dump -Fc -h $OLDHOST $PGDATABASE | pg_restore -C -v -d postgres 2>&1 | tee -a /bitnami/postgresql/migrate.log
     
     # reset the max_wal_size
     psql -d postgres <<EOSQL
@@ -84,7 +84,7 @@ spec:
         - mountPath:  migrate.sh
           name: "migrate-script"
           subPath: "migrate.sh"
-      restartPolicy: OnFailure
+      restartPolicy: Never
       volumes:
       - name: migrate-script
         configMap:
