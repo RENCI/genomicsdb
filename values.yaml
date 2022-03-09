@@ -33,16 +33,14 @@ service:
   type: ClusterIP
   port: 5432
 
-ingress:
+networking:
   enabled: false
-  className: ""
-  annotations: {}
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: ""
-  tls: []
+  type: "sometype"
+  loadbalancerIP:
+  name: "somename"
+  port: 1234
+  protocol: "someprotocol"
+  host: "somehost"
 
 resources:
   requests:
