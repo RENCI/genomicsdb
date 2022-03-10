@@ -36,6 +36,12 @@ spec:
           env:
           - name: POSTGRESQL_USER
             value: {{ .Values.adminuser }}
+          {{- if .Values.dbMigration }}
+          - name: OLDHOST
+            value: {{ .Values.dbMigration.host | quote }}
+          - name: MIGRATE_DATABASE
+            value: {{ .Values.dbMigration.database | quote }}
+          {{- end }}
           envFrom:
             - secretRef:
                 name: "{{ include "genomicsdb.fullname" . }}-password"
@@ -56,6 +62,10 @@ spec:
           - mountPath: /bitnami/postgresql/conf/conf.d/
             name: extended-config
           {{- end }}
+          {{- if .Values.dbMigration }}
+          - mountPath: /docker-entrypoint-initdb.d/
+            name: initdb-script
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -75,6 +85,11 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: {{ .Values.shmSize }}
+        {{- end }}
+        {{- if .Values.dbMigration }}
+        - name: initdb-script
+          configMap:
+            name: "{{- include "genomicsdb.fullname" . }}-migrate"
         {{- end }}
         {{- if .Values.extendedPostgresOptions }}
         - name: extended-config
