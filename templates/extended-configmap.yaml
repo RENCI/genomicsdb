@@ -1,0 +1,10 @@
+{{- if .Values.extendedPostgresOptions }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{- include "genomicsdb.fullname" . }}-pg-conf"
+data:
+  extended.conf: |
+    # extended configuration options added in helm chart
+{{ .Values.extendedPostgresOptions | indent 4 }}
+{{- end }}

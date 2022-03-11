@@ -34,10 +34,17 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: POSTGRES_USER
+          - name: POSTGRESQL_USER
             value: {{ .Values.adminuser }}
-          - name: POSTGRES_PASSWORD
-            value: {{ .Values.adminpassword }}
+          {{- if .Values.dbMigration }}
+          - name: OLDHOST
+            value: {{ .Values.dbMigration.host | quote }}
+          - name: MIGRATE_DATABASE
+            value: {{ .Values.dbMigration.database | quote }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: "{{ include "genomicsdb.fullname" . }}-password"
           ports:
             - name: postgres-port
               containerPort: 5432
@@ -45,10 +52,20 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - mountPath: /var/lib/postgresql/data
-            name: {{ include "genomicsdb.fullname" . }}-postgres-data
+          - mountPath: /bitnami/postgresql
+            name: postgres-data
+          {{- if .Values.shmSize }}
           - mountPath: /dev/shm
             name: dshm
+          {{- end }}
+          {{- if .Values.extendedPostgresOptions }}
+          - mountPath: /bitnami/postgresql/conf/conf.d/
+            name: extended-config
+          {{- end }}
+          {{- if .Values.dbMigration }}
+          - mountPath: /docker-entrypoint-initdb.d/
+            name: initdb-script
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -61,14 +78,28 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if or .Values.shmSize .Values.extendedPostgresOptions }}
       volumes:
+        {{- if .Values.shmSize }}
         - name: dshm
           emptyDir:
             medium: Memory
-            sizeLimit: 400Mi
+            sizeLimit: {{ .Values.shmSize }}
+        {{- end }}
+        {{- if .Values.dbMigration }}
+        - name: initdb-script
+          configMap:
+            name: "{{- include "genomicsdb.fullname" . }}-migrate"
+        {{- end }}
+        {{- if .Values.extendedPostgresOptions }}
+        - name: extended-config
+          configMap:
+            name: "{{- include "genomicsdb.fullname" . }}-pg-conf"
+        {{- end }}
+      {{- end }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ include "genomicsdb.fullname" . }}-postgres-data
+        name: postgres-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:

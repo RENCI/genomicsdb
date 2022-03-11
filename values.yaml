@@ -4,12 +4,17 @@
 replicaCount: 1
 
 image:
-  repository: postgres
-  tag: latest
+  repository: bitnami/postgresql
+  tag: 14.2.0
   pullPolicy: IfNotPresent
+
+# if migrating, this should have host and database fields
+dbMigration: {}
 
 storage:
     size: 25Gi
+
+shmSize: ""
 
 adminuser: changeme
 adminpassword: "changeme"
@@ -27,22 +32,24 @@ podAnnotations: {}
 
 podSecurityContext: {}
 
-securityContext: {}
+securityContext:
+  runAsUser: 1001
+
+# formatted as text string like in postgresql.conf (e.g., `max_wal_size = 1GB`)
+extendedPostgresOptions: ""
 
 service:
   type: ClusterIP
   port: 5432
 
-ingress:
+networking:
   enabled: false
-  className: ""
-  annotations: {}
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: ""
-  tls: []
+  type: "sometype"
+  loadbalancerIP:
+  name: "somename"
+  port: 1234
+  protocol: "someprotocol"
+  host: "somehost"
 
 resources:
   requests:
