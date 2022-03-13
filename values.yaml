@@ -11,18 +11,13 @@ image:
 # if migrating, this should have host and database fields
 dbMigration: {}
 
-storage:
-    size: 25Gi
+dbStorage:
+    size: 25Gi # may very well want more...
 
 shmSize: ""
 
 adminuser: changeme
 adminpassword: "changeme"
-dataUrl: ""
-zipPassword: ""
-zipFileName: ""
-sqlFile1: ""
-sqlFile2: ""
 
 imagePullSecrets: []
 nameOverride: ""
