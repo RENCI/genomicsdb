@@ -1,0 +1,79 @@
+{{ if .Values.backupStorage }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "genomicsdb.fullname" . }}-backup"
+  labels:
+    {{- include "genomicsdb.labels" . | nindent 4 }}
+data:
+  backup.sh: |
+    #!/bin/bash
+    
+    # bash strict mode
+    set -euo pipefail
+    IFS=$'\n\t'
+    
+    # will use the PGUSER PGHOST PGPORT PGPASSWORD set by environment
+    DATE=$(date -Idate)
+    
+    echo "Making backup of globals"
+    pg_dumpall -g > "/backups/globals.$DATE.sql"
+    
+    for DB in $(psql -A --tuples-only -d postgres -c "SELECT datname FROM pg_database" | grep -v -w 'template0')
+    do
+        echo "Making backup of $DB"
+        pg_dump --verbose -Fc "$DB" > "/backups/$DB.$DATE.dump"
+    done
+    
+    echo "Removing files older than 7 days (if any)"
+    find /backups -type f -mtime +7 -execdir rm -- '{}' \;
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: "{{- include "genomicsdb.fullname" . }}-backup"
+  labels:
+    {{- include "genomicsdb.labels" . | nindent 4 }}
+spec:
+  schedule: "0 5 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+            - /bin/bash
+            - -c
+            - "/scripts/backup.sh"
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+            env:
+            - name: PGHOST
+              value: {{ include "genomicsdb.fullname" . }}
+            - name: PGPORT
+              value: "{{ .Values.service.port }}"
+            - name: PGUSER
+              value: {{ .Values.adminuser }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "genomicsdb.fullname" . }}-password"
+                  key: POSTGRESQL_PASSWORD
+            volumeMounts:
+            - mountPath: /scripts
+              name: backup-script
+            - mountPath: /backups
+              name: backup-dir
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-script
+            configMap:
+              name: "{{- include "genomicsdb.fullname" . }}-backup"
+              defaultMode: 0777
+          - name: backup-dir
+            persistentVolumeClaim:
+              claimName: "{{ include "genomicsdb.fullname" . }}-backup"
+{{ end }}

@@ -14,6 +14,9 @@ dbMigration: {}
 dbStorage:
     size: 25Gi # may very well want more...
 
+backupStorage:
+    size: 10Gi # can be smaller than the db, since indexes are not stored, but depends on how many you keep...
+
 shmSize: ""
 
 adminuser: changeme

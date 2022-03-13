@@ -1,0 +1,12 @@
+{{ if .Values.backupStorage.size }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ include "genomicsdb.fullname" . }}-backup"
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.backupStorage.size }}
+{{ end }}
