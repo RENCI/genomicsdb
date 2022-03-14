@@ -11,11 +11,9 @@ image:
 # if migrating, this should have host and database fields
 dbMigration: {}
 
-dbStorage:
-    size: 25Gi # may very well want more...
+dbStorageSize: 25Gi # may very well want more...
 
-backupStorage:
-    size: 10Gi # can be smaller than the db, since indexes are not stored, but depends on how many you keep...
+backupStorageSize: 10Gi # can be smaller than the db, since indexes are not stored, but depends on how many you keep...
 
 shmSize: ""
 

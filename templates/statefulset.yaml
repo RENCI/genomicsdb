@@ -104,4 +104,4 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: {{ .Values.dbStorage.size }}
+            storage: {{ .Values.dbStorageSize }}

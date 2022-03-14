@@ -1,4 +1,4 @@
-{{ if .Values.backupStorage.size }}
+{{ if .Values.backupStorageSize }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -8,5 +8,5 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.backupStorage.size }}
+      storage: {{ .Values.backupStorageSize }}
 {{ end }}
