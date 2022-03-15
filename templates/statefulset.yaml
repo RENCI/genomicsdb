@@ -49,6 +49,17 @@ spec:
             - name: postgres-port
               containerPort: 5432
               protocol: TCP
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            {{- tpl (omit .Values.livenessProbe "enabled" | toYaml) . | nindent 12 }}
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - {{ .Values.adminuser | quote }}
+                - -h
+                - localhost
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
