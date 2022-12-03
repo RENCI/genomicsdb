@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: bitnami/postgresql
-  tag: 14.2.0
+  tag: 15.1.0
   pullPolicy: IfNotPresent
 
 # if migrating, this should have host and database fields
@@ -13,7 +13,7 @@ dbMigration: {}
 
 dbStorageSize: 25Gi # may very well want more...
 
-backupStorageSize: 10Gi # can be smaller than the db, since indexes are not stored, but depends on how many you keep...
+#backupStorageSize: 10Gi # can be smaller than the db, since indexes are not stored, but depends on how many you keep...
 
 shmSize: ""
 

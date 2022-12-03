@@ -1,0 +1,98 @@
+{{ if .Values.restore }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "genomicsdb.fullname" . }}-restore"
+  labels:
+    {{- include "genomicsdb.labels" . | nindent 4 }}
+data:
+  restore.sh: |
+    #!/bin/bash
+    
+    # bash strict mode
+    set -euo pipefail
+    IFS=$'\n\t'
+    
+    MAX_RETRIES=10
+    # will use the PGUSER PGHOST PGPORT PGPASSWORD GLOBALSFILE DUMPFILE set by environment
+    
+    # may have to try a few times while server pod is being brought up
+    i=1
+    while true; do
+      # copy "globals" (users/roles)
+      # exclude the 'postgres' user since that one was defined with initdb
+      grep -v 'ROLE postgres' "/backups/${GLOBALSFILE}" | psql -d postgres && break || echo "failed, try $i"
+      if [ $i -ge $MAX_RETRIES ]; then
+        echo "Maximum retries, exiting"
+        exit -1
+      fi
+      sleep 20
+      ((i++))
+    done
+    echo "hey, it worked this time!"
+    
+    # increase max_wal_size (temporarily) since we're about to do a lot of inserts
+    psql -d postgres <<EOSQL
+    ALTER SYSTEM SET max_wal_size TO '8GB';
+    SELECT pg_reload_conf();
+    EOSQL
+    
+    pg_restore -C -v -d postgres "/backups/${DUMPFILE}" 2>&1 | tee -a /bitnami/postgresql/restore.log
+    
+    # reset the max_wal_size
+    psql -d postgres <<EOSQL
+    ALTER SYSTEM SET max_wal_size TO DEFAULT;
+    SELECT pg_reload_conf();
+    EOSQL
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{- include "genomicsdb.fullname" . }}-restore"
+  labels:
+    {{- include "genomicsdb.labels" . | nindent 4 }}
+spec:
+  suspend: true
+  template:
+    spec:
+      containers:
+      - name: backup
+        image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - /bin/bash
+        - -c
+        - "/scripts/restore.sh"
+        resources:
+          {{- toYaml .Values.initresources | nindent 14 }}
+        env:
+        - name: GLOBALSFILE
+          value: "{{ .Values.restore.globals }}"
+        - name: DUMPFILE
+          value: "{{ .Values.restore.dump }}"
+        - name: PGHOST
+          value: {{ include "genomicsdb.fullname" . }}
+        - name: PGPORT
+          value: "{{ .Values.service.port }}"
+        - name: PGUSER
+          value: {{ .Values.adminuser }}
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{ include "genomicsdb.fullname" . }}-password"
+              key: POSTGRESQL_PASSWORD
+        volumeMounts:
+        - mountPath: /scripts
+          name: restore-script
+        - mountPath: /backups
+          name: backup-dir
+      restartPolicy: OnFailure
+      volumes:
+      - name: restore-script
+        configMap:
+          name: "{{- include "genomicsdb.fullname" . }}-restore"
+          defaultMode: 0777
+      - name: backup-dir
+        persistentVolumeClaim:
+          claimName: "{{ .Values.restore.pvc }}"
+{{ end }}
