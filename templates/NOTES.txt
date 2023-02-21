@@ -13,5 +13,10 @@ To connect to your database run the following command:
     kubectl run {{ include "genomicsdb.fullname" . }}-client --rm --tty -i --restart='Never' --namespace {{ .Release.Namespace }} --image {{ .Values.image.repository }}:{{ .Values.image.tag }} --env="PGPASSWORD=$POSTGRESQL_PASSWORD" \
       --command -- psql --host {{ include "genomicsdb.fullname" . }} -U postgres -d postgres -p {{ .Values.service.port }}
 
+{{ if .Values.restore }}
+A restore job has been created, but it is suspended to make sure everything else starts up first.
+To un-suspend, you can run:
 
+   kubectl patch job.batch {{ include "genomicsdb.fullname" . }}-restore -p '{"spec": {"suspend": false}}'
 
+{{ end }}

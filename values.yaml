@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: bitnami/postgresql
-  tag: 15.1.0
+  tag: 15.2.0
   pullPolicy: IfNotPresent
 
 # if migrating, this should have host and database fields
