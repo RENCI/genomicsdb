@@ -34,7 +34,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: POSTGRESQL_USER
+          - name: POSTGRES_USER
             value: {{ .Values.adminuser }}
           {{- if .Values.dbMigration }}
           - name: OLDHOST
@@ -63,15 +63,16 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - mountPath: /bitnami/postgresql
+          - mountPath: /var/lib/postgresql
             name: postgres-data
           {{- if .Values.shmSize }}
           - mountPath: /dev/shm
             name: dshm
           {{- end }}
-          {{- if .Values.extendedPostgresOptions }}
-          - mountPath: /bitnami/postgresql/conf/conf.d/
-            name: extended-config
+          {{- if .Values.postgresqlConf }}
+          - mountPath: /usr/share/postgresql/postgresql.conf.sample
+            subPath: postgresql.conf.sample
+            name: postgresql-conf
           {{- end }}
           {{- if .Values.dbMigration }}
           - mountPath: /docker-entrypoint-initdb.d/
@@ -89,7 +90,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or .Values.shmSize .Values.extendedPostgresOptions }}
+      {{- if or .Values.shmSize .Values.postgresqlConf }}
       volumes:
         {{- if .Values.shmSize }}
         - name: dshm
@@ -102,8 +103,8 @@ spec:
           configMap:
             name: "{{- include "genomicsdb.fullname" . }}-migrate"
         {{- end }}
-        {{- if .Values.extendedPostgresOptions }}
-        - name: extended-config
+        {{- if .Values.postgresqlConf }}
+        - name: postgresql-conf
           configMap:
             name: "{{- include "genomicsdb.fullname" . }}-pg-conf"
         {{- end }}

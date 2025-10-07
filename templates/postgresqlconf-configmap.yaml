@@ -1,4 +1,4 @@
-{{- if .Values.extendedPostgresOptions }}
+{{- if .Values.postgresqlConf }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,7 +6,8 @@ metadata:
   labels:
     {{- include "genomicsdb.labels" . | nindent 4 }}
 data:
-  extended.conf: |
+  postgresql.conf.sample: |
+    listen_addresses = '*'
     # extended configuration options added in helm chart
-{{ .Values.extendedPostgresOptions | indent 4 }}
+{{ .Values.postgresqlConf | indent 4 }}
 {{- end }}

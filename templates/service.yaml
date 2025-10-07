@@ -7,8 +7,7 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/hostname: {{ .Values.networking.host }}
 spec:
-  type: {{ .Values.networking.type }}
-  loadBalancerIP: {{ .Values.networking.loadbalancerIP }}
+  type: {{ .Values.service.type }}
   ports:
   - name: {{ .Values.networking.name }}
     port: {{ .Values.networking.port }}

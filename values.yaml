@@ -4,8 +4,8 @@
 replicaCount: 1
 
 image:
-  repository: bitnami/postgresql
-  tag: 15.2.0
+  repository: postgres
+  tag: '18.0'
   pullPolicy: IfNotPresent
 
 # if migrating, this should have host and database fields
@@ -28,11 +28,10 @@ podAnnotations: {}
 
 podSecurityContext: {}
 
-securityContext:
-  runAsUser: 1001
+securityContext: {}
 
 # formatted as text string like in postgresql.conf (e.g., `max_wal_size = 1GB`)
-extendedPostgresOptions: ""
+postgresqlConf: ""
 
 service:
   type: ClusterIP
